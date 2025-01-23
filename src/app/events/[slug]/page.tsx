@@ -20,10 +20,14 @@ const EVENT_QUERY = defineQuery(`*[
   venue->
 }`);
 
+interface EventPageParams {
+  slug: string;
+}
+
 export default async function EventPage({
   params,
 }: {
-  params: { slug: string };
+  params: EventPageParams; // Ensure params is correctly typed
 }) {
   const draft = (await draftMode()).isEnabled; // Await draftMode if needed
   const client = getClient(draft);

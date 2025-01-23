@@ -1,5 +1,5 @@
 import { createClient } from "next-sanity";
-import { draftMode } from 'next/headers'
+
 
 // export const client = createClient({
 //   projectId: "itin6a1k",

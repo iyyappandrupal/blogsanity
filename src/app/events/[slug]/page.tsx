@@ -1,4 +1,4 @@
-import { defineQuery, PortableText, type SanityDocument } from "next-sanity";
+import { defineQuery, PortableText } from "next-sanity";
 import imageUrlBuilder from "@sanity/image-url";
 import { SanityImageSource } from "@sanity/image-url/lib/types/types";
 import { getClient } from "../../../../lib/sanity.client";

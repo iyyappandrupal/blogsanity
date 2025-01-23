@@ -4,16 +4,15 @@ import { SanityImageSource } from "@sanity/image-url/lib/types/types";
 import { getClient } from "../../../../lib/sanity.client";
 import Link from "next/link";
 import Image from "next/image";
-import { draftMode } from 'next/headers';
+import { draftMode } from "next/headers";
 import { notFound } from "next/navigation";
 
 const options = { next: { revalidate: 60 } };
 
-
 const EVENT_QUERY = defineQuery(`*[
-    _type == "event" &&
-    slug.current == $slug
-  ][0]{
+  _type == "event" &&
+  slug.current == $slug
+][0]{
   ...,
   "date": coalesce(date, now()),
   "doorsOpen": coalesce(doorsOpen, 0),
@@ -21,26 +20,27 @@ const EVENT_QUERY = defineQuery(`*[
   venue->
 }`);
 
-
-
 export default async function EventPage({
   params,
 }: {
-  params: Promise<{ id: string }>;
+  params: { slug: string }; // Adjusted type
 }) {
-  const draft = (await draftMode()).isEnabled;
+  const draft = draftMode().isEnabled; // Synchronous handling
   const client = getClient(draft);
 
-  const { projectId, dataset } = await client.config();
+  const { projectId, dataset } = client.config();
   const urlFor = (source: SanityImageSource) =>
     projectId && dataset
       ? imageUrlBuilder({ projectId, dataset }).image(source)
       : null;
 
-  const event = await client.fetch(EVENT_QUERY, await params, options);
+  const { slug } = await params; // Await params as it's a promise
+  const event = await client.fetch(EVENT_QUERY, { slug }, options);
+
   if (!event) {
     notFound();
   }
+
   const {
     name,
     date,
@@ -52,14 +52,15 @@ export default async function EventPage({
     venue,
     tickets,
   } = event;
+
   const eventImageUrl = image
     ? urlFor(image)?.width(550).height(310).url()
+    : "https://via.placeholder.com/550x310";
+  const eventDate = date ? new Date(date).toDateString() : null;
+  const eventTime = date ? new Date(date).toLocaleTimeString() : null;
+  const doorsOpenTime = date
+    ? new Date(new Date(date).getTime() - doorsOpen * 60000).toLocaleTimeString()
     : null;
-  const eventDate = new Date(date).toDateString();
-  const eventTime = new Date(date).toLocaleTimeString();
-  const doorsOpenTime = new Date(
-    new Date(date).getTime() - doorsOpen * 60000
-  ).toLocaleTimeString();
 
   return (
     <main className="container mx-auto grid gap-12 p-12">
@@ -68,7 +69,7 @@ export default async function EventPage({
       </div>
       <div className="grid items-top gap-12 sm:grid-cols-2">
         <Image
-          src={eventImageUrl || "https://via.placeholder.com/550x310"}
+          src={eventImageUrl}
           alt={name || "Event"}
           className="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full"
           height="310"
@@ -76,22 +77,20 @@ export default async function EventPage({
         />
         <div className="flex flex-col justify-center space-y-4">
           <div className="space-y-4">
-            {eventType ? (
+            {eventType && (
               <div className="inline-block rounded-lg bg-gray-100 px-3 py-1 text-sm dark:bg-gray-800 capitalize">
                 {eventType.replace("-", " ")}
               </div>
-            ) : null}
-            {name ? (
-              <h1 className="text-4xl font-bold tracking-tighter mb-8">
-                {name}
-              </h1>
-            ) : null}
-            {headline?.name ? (
+            )}
+            {name && (
+              <h1 className="text-4xl font-bold tracking-tighter mb-8">{name}</h1>
+            )}
+            {headline?.name && (
               <dl className="grid grid-cols-2 gap-1 text-sm font-medium sm:gap-2 lg:text-base">
                 <dd className="font-semibold">Artist</dd>
-                <dt>{headline?.name}</dt>
+                <dt>{headline.name}</dt>
               </dl>
-            ) : null}
+            )}
             <dl className="grid grid-cols-2 gap-1 text-sm font-medium sm:gap-2 lg:text-base">
               <dd className="font-semibold">Date</dd>
               <div>
@@ -99,27 +98,20 @@ export default async function EventPage({
                 {eventTime && <dt>{eventTime}</dt>}
               </div>
             </dl>
-            {doorsOpenTime ? (
+            {doorsOpenTime && (
               <dl className="grid grid-cols-2 gap-1 text-sm font-medium sm:gap-2 lg:text-base">
                 <dd className="font-semibold">Doors Open</dd>
-                <div className="grid gap-1">
-                  <dt>Doors Open</dt>
-                  <dt>{doorsOpenTime}</dt>
-                </div>
+                <dt>{doorsOpenTime}</dt>
               </dl>
-            ) : null}
-            {venue?.name ? (
+            )}
+            {venue?.name && (
               <dl className="grid grid-cols-2 gap-1 text-sm font-medium sm:gap-2 lg:text-base">
-                <div className="flex items-start">
-                  <dd className="font-semibold">Venue</dd>
-                </div>
-                <div className="grid gap-1">
-                  <dt>{venue.name}</dt>
-                </div>
+                <dd className="font-semibold">Venue</dd>
+                <dt>{venue.name}</dt>
               </dl>
-            ) : null}
+            )}
           </div>
-          {details && details.length > 0 && (
+          {details?.length > 0 && (
             <div className="prose max-w-none">
               <PortableText value={details} />
             </div>

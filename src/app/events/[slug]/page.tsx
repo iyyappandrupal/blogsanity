@@ -7,6 +7,7 @@ import Image from "next/image";
 import { draftMode } from "next/headers";
 import { notFound } from "next/navigation";
 
+
 const options = { next: { revalidate: 60 } };
 
 const EVENT_QUERY = defineQuery(`*[
@@ -20,14 +21,10 @@ const EVENT_QUERY = defineQuery(`*[
   venue->
 }`);
 
-interface EventPageParams {
-  slug: string;
-}
-
 export default async function EventPage({
   params,
 }: {
-  params: EventPageParams | Promise<EventPageParams>; // Allow Promise type as well
+    params: Promise<{ slug: string }>; // Allow Promise type as well
 }) {
   // Ensure params is resolved before proceeding
   const resolvedParams = await params;

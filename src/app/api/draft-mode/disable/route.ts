@@ -4,7 +4,7 @@ import { draftMode } from 'next/headers';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(request: NextRequest) {
-  const draftModeInstance = draftMode(); // Get the draftMode instance
-  draftModeInstance.disable();          // Disable draft mode
+  const draftModeInstance = await draftMode(); // Await the promise
+  draftModeInstance.disable(); // Now you can access `disable` correctly
   return NextResponse.redirect(new URL('/', request.url));
 }

@@ -27,8 +27,11 @@ interface EventPageParams {
 export default async function EventPage({
   params,
 }: {
-  params: EventPageParams; // Ensure params is correctly typed
+  params: EventPageParams | Promise<EventPageParams>; // Allow Promise type as well
 }) {
+  // Ensure params is resolved before proceeding
+  const resolvedParams = await params;
+
   const draft = (await draftMode()).isEnabled; // Await draftMode if needed
   const client = getClient(draft);
 
@@ -38,7 +41,7 @@ export default async function EventPage({
       ? imageUrlBuilder({ projectId, dataset }).image(source)
       : null;
 
-  const event = await client.fetch(EVENT_QUERY, { slug: params.slug }, options);
+  const event = await client.fetch(EVENT_QUERY, { slug: resolvedParams.slug }, options);
   if (!event) {
     notFound();
   }

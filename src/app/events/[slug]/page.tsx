@@ -10,9 +10,9 @@ import { notFound } from "next/navigation";
 const options = { next: { revalidate: 60 } };
 
 const EVENT_QUERY = defineQuery(`*[
-  _type == "event" &&
-  slug.current == $slug
-][0]{
+    _type == "event" &&
+    slug.current == $slug
+  ][0]{
   ...,
   "date": coalesce(date, now()),
   "doorsOpen": coalesce(doorsOpen, 0),
@@ -23,20 +23,18 @@ const EVENT_QUERY = defineQuery(`*[
 export default async function EventPage({
   params,
 }: {
-  params: { slug: string }; // Adjusted type
+  params: { slug: string };
 }) {
-  const draft = draftMode().isEnabled; // Synchronous handling
+  const draft = (await draftMode()).isEnabled; // Await draftMode if needed
   const client = getClient(draft);
 
-  const { projectId, dataset } = client.config();
+  const { projectId, dataset } = await client.config();
   const urlFor = (source: SanityImageSource) =>
     projectId && dataset
       ? imageUrlBuilder({ projectId, dataset }).image(source)
       : null;
 
-  const { slug } = await params; // Await params as it's a promise
-  const event = await client.fetch(EVENT_QUERY, { slug }, options);
-
+  const event = await client.fetch(EVENT_QUERY, { slug: params.slug }, options);
   if (!event) {
     notFound();
   }
@@ -55,12 +53,12 @@ export default async function EventPage({
 
   const eventImageUrl = image
     ? urlFor(image)?.width(550).height(310).url()
-    : "https://via.placeholder.com/550x310";
-  const eventDate = date ? new Date(date).toDateString() : null;
-  const eventTime = date ? new Date(date).toLocaleTimeString() : null;
-  const doorsOpenTime = date
-    ? new Date(new Date(date).getTime() - doorsOpen * 60000).toLocaleTimeString()
     : null;
+  const eventDate = new Date(date).toDateString();
+  const eventTime = new Date(date).toLocaleTimeString();
+  const doorsOpenTime = new Date(
+    new Date(date).getTime() - doorsOpen * 60000
+  ).toLocaleTimeString();
 
   return (
     <main className="container mx-auto grid gap-12 p-12">
@@ -69,7 +67,7 @@ export default async function EventPage({
       </div>
       <div className="grid items-top gap-12 sm:grid-cols-2">
         <Image
-          src={eventImageUrl}
+          src={eventImageUrl || "https://via.placeholder.com/550x310"}
           alt={name || "Event"}
           className="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full"
           height="310"
@@ -88,7 +86,7 @@ export default async function EventPage({
             {headline?.name && (
               <dl className="grid grid-cols-2 gap-1 text-sm font-medium sm:gap-2 lg:text-base">
                 <dd className="font-semibold">Artist</dd>
-                <dt>{headline.name}</dt>
+                <dt>{headline?.name}</dt>
               </dl>
             )}
             <dl className="grid grid-cols-2 gap-1 text-sm font-medium sm:gap-2 lg:text-base">
@@ -101,13 +99,20 @@ export default async function EventPage({
             {doorsOpenTime && (
               <dl className="grid grid-cols-2 gap-1 text-sm font-medium sm:gap-2 lg:text-base">
                 <dd className="font-semibold">Doors Open</dd>
-                <dt>{doorsOpenTime}</dt>
+                <div className="grid gap-1">
+                  <dt>Doors Open</dt>
+                  <dt>{doorsOpenTime}</dt>
+                </div>
               </dl>
             )}
             {venue?.name && (
               <dl className="grid grid-cols-2 gap-1 text-sm font-medium sm:gap-2 lg:text-base">
-                <dd className="font-semibold">Venue</dd>
-                <dt>{venue.name}</dt>
+                <div className="flex items-start">
+                  <dd className="font-semibold">Venue</dd>
+                </div>
+                <div className="grid gap-1">
+                  <dt>{venue.name}</dt>
+                </div>
               </dl>
             )}
           </div>

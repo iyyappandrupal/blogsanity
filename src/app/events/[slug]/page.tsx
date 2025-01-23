@@ -57,7 +57,7 @@ export default async function EventPage({
   const eventDate = new Date(date).toDateString();
   const eventTime = new Date(date).toLocaleTimeString();
   const doorsOpenTime = new Date(
-    new Date(date).getTime() - doorsOpen * 60000
+    new Date(date).getTime() - ((doorsOpen ?? 0) * 60000)
   ).toLocaleTimeString();
 
   return (
@@ -116,11 +116,12 @@ export default async function EventPage({
               </dl>
             )}
           </div>
-          {details?.length > 0 && (
+          {Array.isArray(details) && details.length > 0 && (
             <div className="prose max-w-none">
               <PortableText value={details} />
             </div>
           )}
+
           {tickets && (
             <a
               className="flex items-center justify-center rounded-md bg-blue-500 p-4 text-white"

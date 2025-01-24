@@ -5,6 +5,9 @@ const NextConfig = {
   images: {
     domains: ["cdn.sanity.io", "via.placeholder.com"],
   },
+  remotePatterns: {
+    domains: ["cdn.sanity.io", "via.placeholder.com"],
+  }
 };
 
 export default NextConfig;

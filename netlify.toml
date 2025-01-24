@@ -1,0 +1,6 @@
+[build.environment]
+NETLIFY_IMAGE_CDN = "true"
+
+[images]
+remote_images = ["https://via.placeholder.com/.*""]
+

@@ -5,12 +5,10 @@ const NextConfig = {
   images: {
     remotePatterns: [
       {
-        protocol: "https", // or "http"
-        hostname: "cdn.sanity.io", // Replace with the domain of the image source
+        hostname: "cdn.sanity.io",
       },
       {
-        protocol: "https", // or "http"
-        hostname: "via.placeholder.com", // Replace with the domain of the image source
+        hostname: "via.placeholder.com",
       },
     ],
   },

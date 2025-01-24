@@ -15,7 +15,7 @@ const NextConfig = {
         protocol: "https", // or "http"
         hostname: "via.placeholder.com", // Replace with the domain of the image source
         port: "", // Leave empty unless a specific port is required
-        pathname: "/**", // Use ** for wildcard matching
+        pathname: "/550x310/**", // Use ** for wildcard matching
       },
     ],
   },
